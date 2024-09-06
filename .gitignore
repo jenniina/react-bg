@@ -8,3 +8,5 @@ install-dependencies.js
 install-dependencies.sh
 dist
 chrome-headless-shell
+.cache/puppeteer/chrome
+

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import puppeteer from 'puppeteer-core'
+import puppeteer from 'puppeteer'
 import { EError, EErrorCapturingScreenshot, ELanguage } from '../../types'
 
 const takeScreenshot = async (req: Request, res: Response) => {
@@ -11,7 +11,6 @@ const takeScreenshot = async (req: Request, res: Response) => {
        headless: true,
        args: ['--no-sandbox', '--disable-setuid-sandbox'],
        ignoreDefaultArgs: ['--disable-extensions'],
-       executablePath: '/usr/src/app/.cache/puppeteer/chrome/linux-128.0.6613.119/chrome-linux64/chrome'       
     })
     const page = await browser.newPage()
 

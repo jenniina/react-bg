@@ -37,6 +37,8 @@ RUN npm i puppeteer
 
 RUN npx puppeteer install
 
+RUN npx puppeteer browsers install chrome
+
 RUN npm install -g typescript
 
 RUN npm run build

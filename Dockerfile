@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY . .
 
+COPY .cache .cache
+
 RUN npm install -g typescript
 
 RUN npm run build

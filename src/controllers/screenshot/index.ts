@@ -18,7 +18,6 @@ const takeScreenshot = async (req: Request, res: Response) => {
 
     // Get localStorage data
     if (localStorageData) {
-      console.log('localStorageData: ', localStorageData)
       await page.evaluateOnNewDocument((data) => {
         for (const key in data) {
           localStorage.setItem(key, data[key])
@@ -37,6 +36,10 @@ const takeScreenshot = async (req: Request, res: Response) => {
       const toTopBtn = document.getElementById('to-top-btn')
       if (toTopBtn) {
         toTopBtn.style.display = 'none'
+      }
+      const menu = document.getElementById('site-navigation')
+      if (menu) {
+	menu.style.display = 'none'
       }
     })
 

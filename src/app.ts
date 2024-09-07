@@ -9,7 +9,7 @@ const app: Express = express()
 
 const PORT: string | number = process.env.PORT || 4000
 
-const allowedOrigin = process.env.CORS_ORIGIN || 'https://react.jenniina.fi'
+const allowedOrigin = process.env.CORS_ORIGIN ?? 'https://react.jenniina.fi'
 
 app.use(
   cors({

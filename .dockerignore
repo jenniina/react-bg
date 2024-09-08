@@ -1,5 +1,6 @@
 node_modules
 npm-debug.log
-Dockerfile
-.dockerignore
+Dockerfile 
 dist
+.env
+.cache

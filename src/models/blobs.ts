@@ -8,10 +8,6 @@ const BlobSchema: Schema = new Schema({
   x: String,
   y: String,
   z: String,
-  display: String,
-  ariaGrabbed: Boolean,
-  draggable: Boolean,
-  tabIndex: Number,
   background: String,
   function: { type: Schema.Types.Mixed },
 })

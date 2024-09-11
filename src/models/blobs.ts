@@ -31,10 +31,11 @@ const BlobsSchema: Schema = new Schema({
   draggables: [BlobSchema],
   backgroundColor: {
     type: [String],
-    validate: [
-      arrayLimit,
-      'Color array must contain exactly three strings representing lightness, saturation, and hue.',
-    ],
+    validate: {
+      validator: arrayLimit,
+      message:
+        'Color array must contain exactly three strings representing lightness, saturation, and hue.',
+    },
   },
   versionName: { type: String, required: true },
 })

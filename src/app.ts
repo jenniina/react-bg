@@ -2,7 +2,6 @@ import express, { Express } from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import routes from './routes'
-import { Blobs } from './models/blobs'
 
 require('dotenv').config()
 
@@ -37,9 +36,9 @@ const options = { useNewUrlParser: true, useUnifiedTopology: true }
 
 mongoose
   .connect(uri)
-  .then(() => {
+  .then(() =>
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`))
-  })
+  )
   .catch((error) => {
     throw error
   })

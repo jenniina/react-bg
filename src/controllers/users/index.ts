@@ -2285,6 +2285,7 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
     await Quiz.deleteMany({ user: id })
 
     if (deleteJokes === 'true') {
+      await Joke.updateMany({ user: id }, { $pull: { user: id } })
       await Joke.deleteMany({ author: id })
     } else {
       await Joke.updateMany({ user: id }, { $pull: { user: id } })

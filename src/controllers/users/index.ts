@@ -15,6 +15,7 @@ import { ITokenPayload, IToken } from '../../types'
 import jwt, { JwtPayload, Secret } from 'jsonwebtoken'
 import { sendMail } from '../email'
 import { ELanguage } from '../../types'
+import { Blobs } from '../../models/blobs'
 
 const dotenv = require('dotenv')
 dotenv.config()
@@ -2284,6 +2285,8 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
     await Quiz.deleteMany({ user: id })
 
     await Joke.updateMany({ users: id }, { $pull: { users: id } })
+
+    await Blobs.deleteMany({ user: id })
 
     await User.deleteOne({ _id: id })
 

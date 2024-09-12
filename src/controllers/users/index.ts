@@ -2278,13 +2278,17 @@ const resetPasswordToken = async (req: Request, res: Response): Promise<void> =>
 
 const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params
+    const { id, deleteJokes } = req.params
 
     await Todo.deleteMany({ user: id })
 
     await Quiz.deleteMany({ user: id })
 
-    await Joke.updateMany({ users: id }, { $pull: { users: id } })
+    if (deleteJokes === 'true') {
+      await Joke.deleteMany({ author: id })
+    } else {
+      await Joke.updateMany({ user: id }, { $pull: { user: id } })
+    }
 
     await Blobs.deleteMany({ user: id })
 

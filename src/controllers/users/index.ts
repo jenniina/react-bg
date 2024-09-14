@@ -917,7 +917,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
           token: user.token,
         })
       } else {
-        console.log(refresh?.message)
+        // console.log(refresh?.message)
         res.status(401).json({ success: false, message: refresh?.message })
       }
       // res.status(401).json({ message: 'User not verified. Please check your email' })
@@ -930,7 +930,7 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   const language = req.body.language || 'en'
   const user: IUser | null = await User.findOne({ username })
   if (!user) {
-    console.log('User not found')
+    console.error('User not found', username)
     res.status(401).json({ success: false, message: EError[language as ELanguage] })
   } else if (user) {
     try {
@@ -949,14 +949,14 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
         link
       )
         .then((result) => {
-          console.log('result ', result)
+          // console.log('result ', result)
           res.status(200).json({
             success: true,
             message: ETokenSent[language as unknown as ELanguage] || 'Token sent',
           })
         })
         .catch((error) => {
-          console.log(error)
+          console.error(error)
           res.status(500).json({
             success: false,
             message:
@@ -1423,7 +1423,7 @@ const refreshExpiredToken = async (
 //               }
 //             })
 //             .catch((error) => {
-//               console.log(error)
+//               console.error(error)
 //               return {
 //                 success: false,
 //                 message: EErrorSendingMail[body.language] || 'Error sending mail ¤',
@@ -1544,7 +1544,7 @@ const requestNewToken = async (req: Request, res: Response): Promise<void> => {
 //             },
 //             (error: Error | null, info: any) => {
 //               if (error) {
-//                 console.log(error)
+//                 console.error(error)
 //                 reject(error)
 //                 res
 //                   .status(500)
@@ -1574,7 +1574,7 @@ const requestNewToken = async (req: Request, res: Response): Promise<void> => {
 //           console.log(result)
 //         })
 //         .catch((error) => {
-//           console.log(error)
+//           console.error(error)
 //           res.status(500).json({
 //             message: EErrorSendingMail[(req.body.language as ELanguage) || 'en'],
 //           })

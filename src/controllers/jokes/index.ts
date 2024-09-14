@@ -222,7 +222,7 @@ const addJoke = async (req: Request, res: Response): Promise<void> => {
 
       try {
         const mailResponse = await sendMail(subject, message, adminEmail, link)
-        console.log(EEmailSent[joke.language as ELanguage], mailResponse)
+        // console.log(EEmailSent[joke.language as ELanguage], mailResponse)
         res.status(201).json({
           success: true,
           message:

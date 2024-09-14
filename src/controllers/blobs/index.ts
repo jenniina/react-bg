@@ -79,8 +79,6 @@ export const saveBlobsByUser = async (req: Request, res: Response) => {
         )
     }
 
-    console.log('versionName: ', versionName)
-
     await Blobs.findOneAndUpdate(
       { user, versionName },
       { user, d, draggables, backgroundColor, versionName },

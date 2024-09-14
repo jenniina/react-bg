@@ -27,21 +27,20 @@ const updateAllTodos = async (req: Request, res: Response) => {
     if (!todoDocument) {
       const newTodo = new Todo({ user, todos: newTodos })
       const savedTodoDocument = await newTodo.save()
-      console.log('savedTodoDocument.todos: ', savedTodoDocument.todos)
       return res.json(savedTodoDocument.todos)
     } else {
-      console.log('todoDocument.todos 1: ', todoDocument.todos)
+      // console.log('todoDocument.todos 1: ', todoDocument.todos)
       todoDocument.todos = todoDocument.todos.map((todo: ITodo) => {
         const newTodo = newTodos.find((newTodo) => newTodo.key === todo.key)
         return newTodo ? newTodo : todo
       })
-      console.log('todoDocument.todos 2: ', todoDocument.todos)
+      // console.log('todoDocument.todos 2: ', todoDocument.todos)
       todoDocument = await Todo.findOneAndUpdate(
         { user },
         { todos: todoDocument.todos },
         { new: true, useFindAndModify: false }
       )
-      console.log('todoDocument: ', todoDocument)
+      // console.log('todoDocument: ', todoDocument)
       return res.json(todoDocument?.todos)
     }
   } catch (error) {
@@ -88,7 +87,7 @@ const addTodo = async (req: Request, res: Response) => {
 const deleteTodo = async (req: Request, res: Response) => {
   try {
     const { user, key } = req.params
-    console.log('deleteTodo user: ', user)
+    // console.log('deleteTodo user: ', user)
     const updatedTodoDocument = await Todo.findOneAndUpdate(
       { user },
       { $pull: { todos: { key: key } } },
@@ -117,7 +116,7 @@ const deleteTodo = async (req: Request, res: Response) => {
 
 const clearCompletedTodos = async (req: Request, res: Response) => {
   try {
-    console.log('user: ', req.params.user)
+    // console.log('user: ', req.params.user)
     const { user } = req.params
     //const userId = new mongoose.Types.ObjectId(user)
     const updatedTodoDocument = await Todo.findOneAndUpdate(

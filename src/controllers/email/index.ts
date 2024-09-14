@@ -67,11 +67,11 @@ export const sendMail = (
       },
       (error: Error, info: { response: unknown }) => {
         if (error) {
-          console.log(error)
+          console.error(error)
           reject(error)
           return error
         } else {
-          console.log('Email sent: ' + info.response)
+          // console.log('Email sent: ' + info.response)
           resolve(info.response)
           return info.response
         }
@@ -83,7 +83,7 @@ export const sendMail = (
 export const sendEmailForm = async (req: Request, res: Response) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    console.log(errors)
+    console.error(errors)
     return res.status(400).json({ errors: errors.array() })
   }
 
@@ -121,16 +121,15 @@ export const sendEmailForm = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions)
     res.status(200).send('Email sent')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     res.status(500).send('Error sending email')
   }
 }
 
 export const sendEmailSelect = async (req: Request, res: Response) => {
-  console.log(req.body)
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    console.log(errors)
+    console.error(errors)
     return res.status(400).json({ errors: errors.array() })
   }
 
@@ -163,7 +162,7 @@ export const sendEmailSelect = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions)
     res.status(200).send('Email sent')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     res.status(500).send('Error sending email')
   }
 }
@@ -171,7 +170,7 @@ export const sendEmailSelect = async (req: Request, res: Response) => {
 export const sendVerificationLink = async (req: Request, res: Response) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    console.log(errors)
+    console.error(errors)
     return res.status(400).json({ errors: errors.array() })
   }
   const { email } = req.body
@@ -200,7 +199,7 @@ export const sendVerificationLink = async (req: Request, res: Response) => {
     await transporter.sendMail(mailOptions)
     res.status(200).send('Email sent')
   } catch (error) {
-    console.log(error)
+    console.error(error)
     res.status(500).send('Error sending email')
   }
 }

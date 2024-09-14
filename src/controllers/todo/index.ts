@@ -124,7 +124,7 @@ const clearCompletedTodos = async (req: Request, res: Response) => {
       { $pull: { todos: { complete: true } } },
       { new: true, useFindAndModify: false }
     )
-    console.log('updatedTodoDocument: ', updatedTodoDocument)
+    // console.log('updatedTodoDocument: ', updatedTodoDocument)
     if (!updatedTodoDocument) {
       return res.status(404).json({ message: 'No todos found for this user' })
     }

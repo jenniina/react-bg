@@ -61,7 +61,7 @@ const addQuiz = async (req: Request, res: Response): Promise<void> => {
     const body = req.body as Pick<IQuiz, 'highscores' | 'user'>
 
     if (!body.user) {
-      res.status(400).json({ message: 'user field is required' })
+      res.status(400).json({ success: false, message: 'user field is required' })
       return
     }
 
@@ -76,20 +76,24 @@ const addQuiz = async (req: Request, res: Response): Promise<void> => {
       }) as IQuiz
 
       const newQuiz: IQuiz = await quiz.save()
-      res.status(201).json({ message: 'Quiz added', quiz: newQuiz })
+      res.status(201).json({ success: true, message: 'Quiz added', quiz: newQuiz })
     } else {
       existingQuiz.highscores = body.highscores
       try {
         const updatedQuiz = (await existingQuiz.save()) as IQuiz
-        res.status(200).json({ message: 'Quiz updated', quiz: updatedQuiz })
+        res
+          .status(200)
+          .json({ success: true, message: 'Quiz updated', quiz: updatedQuiz })
       } catch (validationError) {
         console.error(validationError)
-        res.status(400).json({ message: 'Quiz not updated', error: validationError })
+        res
+          .status(400)
+          .json({ success: false, message: 'Quiz not updated', error: validationError })
       }
     }
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -98,7 +102,7 @@ const removeOldestDuplicate = async (req: Request, res: Response): Promise<void>
     const { user } = req.params as Pick<IQuiz, 'user'>
 
     if (!user) {
-      res.status(400).json({ message: 'user field is required' })
+      res.status(400).json({ success: false, message: 'user field is required' })
       return
     }
 
@@ -109,13 +113,13 @@ const removeOldestDuplicate = async (req: Request, res: Response): Promise<void>
     if (existingQuiz.length > 1) {
       const oldestQuiz = existingQuiz[0]
       await Quiz.deleteOne({ _id: oldestQuiz._id })
-      res.status(200).json({ message: 'Quiz deleted', quiz: oldestQuiz })
+      res.status(200).json({ success: true, message: 'Quiz deleted', quiz: oldestQuiz })
     } else {
-      res.status(200).json({ message: 'No duplicate found' })
+      res.status(200).json({ success: true, message: 'No duplicate found' })
     }
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 

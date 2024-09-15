@@ -6,11 +6,11 @@ const takeScreenshot = async (req: Request, res: Response) => {
   const { url, selector, language, localStorageData, width, height } = req.body
 
   try {
-	  console.log('Launching browser...')
+    console.log('Launching browser...')
     const browser = await puppeteer.launch({
-       headless: true,
-       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-       ignoreDefaultArgs: ['--disable-extensions'],
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      ignoreDefaultArgs: ['--disable-extensions'],
     })
     const page = await browser.newPage()
 
@@ -27,9 +27,14 @@ const takeScreenshot = async (req: Request, res: Response) => {
 
     await page.goto(url, { waitUntil: 'networkidle2' })
 
+    const lastChar = selector.slice(-1)
     // hide controls
-    await page.waitForSelector('#toggle-controls')
-    await page.click('#toggle-controls')
+    await page.waitForSelector(`#toggle-controls${lastChar}`)
+    await page.click(`#toggle-controls${lastChar}`)
+
+    //stop animation
+    await page.waitForSelector(`#stop-blobs${lastChar}`)
+    await page.click(`#stop-blobs${lastChar}`)
 
     // Hide the to-top-btn button
     await page.evaluate(() => {
@@ -39,7 +44,7 @@ const takeScreenshot = async (req: Request, res: Response) => {
       }
       const menu = document.getElementById('site-navigation')
       if (menu) {
-	menu.style.display = 'none'
+        menu.style.display = 'none'
       }
     })
 

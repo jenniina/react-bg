@@ -894,9 +894,10 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
         }
       } catch (error) {
         console.error(error)
-        res
-          .status(500)
-          .json({ message: EError[(req.body.language as ELanguage) || 'en'] })
+        res.status(500).json({
+          success: false,
+          message: EError[(req.body.language as ELanguage) || 'en'],
+        })
       }
     } else if (!user.verified) {
       //generate new token
@@ -1133,7 +1134,7 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
       const user = await User.findOne({ username })
       const refresh = await refreshExpiredToken(req, user?._id)
       if (refresh?.success) {
-        res.status(401).json({ success: true, message: refresh.message })
+        res.status(401).json({ success: false, message: refresh.message })
       } else {
         res.status(401).json({ success: false, message: refresh?.message })
       }
@@ -2093,7 +2094,7 @@ const resetPasswordToken = async (req: Request, res: Response): Promise<void> =>
     // Validate the token
     const user = await User.findOne({ resetToken: token })
     if (!user) {
-      res.status(400).json({ message: InvalidOrExpiredToken })
+      res.status(400).json({ success: false, message: InvalidOrExpiredToken })
     } else if (user) {
       // Check if newPassword and confirmPassword match
       if (newPassword !== confirmPassword) {

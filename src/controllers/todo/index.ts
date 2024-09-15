@@ -15,7 +15,7 @@ const getTodos = async (req: Request, res: Response) => {
     res.json(todoDocument?.todos)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -45,7 +45,7 @@ const updateAllTodos = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -54,7 +54,9 @@ const addTodo = async (req: Request, res: Response) => {
     const { user } = req.params
     const todoDocument = await Todo.findOne({ user })
     if (!todoDocument) {
-      return res.status(404).json({ message: 'No todos found for this user' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'No todos found for this user' })
     }
     const { complete, name, key } = req.body
     const maxOrder = todoDocument.todos.reduce(
@@ -65,7 +67,10 @@ const addTodo = async (req: Request, res: Response) => {
     if (complete === undefined || name === undefined || key === undefined) {
       return res
         .status(400)
-        .json({ message: 'Task must include complete, name, and key fields' })
+        .json({
+          success: false,
+          message: 'Task must include complete, name, and key fields',
+        })
     }
     const newTodo = { complete, name, key, order: maxOrder + 1 }
     const updatedTodoDocument = await Todo.findOneAndUpdate(
@@ -74,13 +79,15 @@ const addTodo = async (req: Request, res: Response) => {
       { new: true, useFindAndModify: false }
     )
     if (!updatedTodoDocument) {
-      return res.status(404).json({ message: 'No todos found for this user' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'No todos found for this user' })
     }
     const addedTodo = updatedTodoDocument.todos.find((todo: ITodo) => todo.key === key)
     res.json(addedTodo)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -94,7 +101,9 @@ const deleteTodo = async (req: Request, res: Response) => {
       { new: true, useFindAndModify: false }
     )
     if (!updatedTodoDocument) {
-      return res.status(404).json({ message: 'No todos found for this user' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'No todos found for this user' })
     }
 
     // Sort the todos by the original order
@@ -110,7 +119,7 @@ const deleteTodo = async (req: Request, res: Response) => {
     res.json(updatedTodoDocument)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -126,12 +135,14 @@ const clearCompletedTodos = async (req: Request, res: Response) => {
     )
     // console.log('updatedTodoDocument: ', updatedTodoDocument)
     if (!updatedTodoDocument) {
-      return res.status(404).json({ message: 'No todos found for this user' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'No todos found for this user' })
     }
     res.json(updatedTodoDocument)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -144,14 +155,16 @@ const editTodo = async (req: Request, res: Response) => {
       { new: true }
     )
     if (!todoDocument) {
-      return res.status(404).json({ message: 'No todos found for this user' })
+      return res
+        .status(404)
+        .json({ success: false, message: 'No todos found for this user' })
     }
     //return the updated todo
     const updatedTodo: ITodos = todoDocument.todos.find((todo: ITodo) => todo.key === key)
     res.json(updatedTodo)
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: 'Internal server error' })
+    res.status(500).json({ success: false, message: 'Internal server error' })
   }
 }
 
@@ -163,7 +176,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
     if (!todosWithNewOrder || !Array.isArray(todosWithNewOrder)) {
       return res
         .status(400)
-        .json({ message: 'Todos field is required and it should be an array' })
+        .json({
+          success: false,
+          message: 'Todos field is required and it should be an array',
+        })
     }
 
     const session = await mongoose.startSession()
@@ -181,7 +197,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
         session.endSession()
         return res
           .status(404)
-          .json({ message: `No todo found for this user with key: ${key}` })
+          .json({
+            success: false,
+            message: `No todo found for this user with key: ${key}`,
+          })
       }
     }
 
@@ -194,7 +213,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
     console.error(error)
     res
       .status(500)
-      .json({ message: `Internal server error. ${(error as Error).message}` })
+      .json({
+        success: false,
+        message: `Internal server error. ${(error as Error).message}`,
+      })
   }
 }
 

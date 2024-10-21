@@ -12,19 +12,6 @@ const BlobSchema: Schema = new Schema({
   function: { type: Schema.Types.Mixed },
 })
 
-const BlobsBackgroundSchema: Schema = new Schema({
-  color: {
-    type: [String],
-    validate: {
-      validator: function (v: string[]) {
-        return v.length === 3
-      },
-      message:
-        'Color array must contain exactly three strings representing lightness, saturation, and hue.',
-    },
-  },
-})
-
 const BlobsSchema: Schema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   d: { type: Number, required: true },
@@ -34,7 +21,7 @@ const BlobsSchema: Schema = new Schema({
     validate: {
       validator: arrayLimit,
       message:
-        'Color array must contain exactly three strings representing lightness, saturation, and hue.',
+        'Color array must contain exactly three strings representing hue, saturation, and lightness.',
     },
   },
   versionName: { type: String, required: true },

@@ -29,16 +29,6 @@ enum EError {
   cs = 'Došlo k chybě',
   fi = 'Virhe tapahtui',
 }
-// enum ELanguage {
-//   en = 'en',
-//   es = 'es',
-//   fr = 'fr',
-//   de = 'de',
-//   pt = 'pt',
-//   cs = 'cs',
-//   fi = 'fi',
-// }
-
 enum EJenniinaFi {
   en = 'Jenniina.fi React',
   es = 'React Jenniina.fi',
@@ -203,6 +193,15 @@ enum EAccessDeniedAdminPrivilegeRequired {
   cs = 'Přístup odepřen. Vyžaduje se oprávnění správce.',
   fi = 'Pääsy evätty. Vaaditaan ylläpitäjän oikeudet.',
 }
+enum EAccessDeniedManagementPrivilegeRequired {
+  en = 'Access denied. Management privilege required.',
+  es = 'Acceso denegado. Se requiere privilegio de gestión.',
+  fr = 'Accès refusé. Privilège de gestion requis.',
+  de = 'Zugriff verweigert. Managementberechtigung erforderlich.',
+  pt = 'Acesso negado. Privilégio de gerenciamento necessário.',
+  cs = 'Přístup odepřen. Vyžaduje se oprávnění managementu.',
+  fi = 'Pääsy evätty. Vaaditaan hallintaoikeus.',
+}
 enum EAuthenticationFailed {
   en = 'Authentication failed',
   es = 'Autenticación fallida',
@@ -325,17 +324,6 @@ const authenticateUser = async (
     res.status(401).json({ success: false, message: 'Authentication failed' })
   }
 }
-// const secret: Secret = process.env.JWT_SECRET || 'sfj0ker8GJ3RT3s5djdf23'
-// try {
-//   if (token) return jwt.verify(token, secret) as JwtPayload
-//   else return undefined
-// } catch (error) {
-//   if ((error as Error).name === 'TokenExpiredError') {
-//     throw new Error('Token expired')
-//   } else {
-//     throw error // Re-throw other errors
-//   }
-// }
 
 const verifyTokenMiddleware = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -358,9 +346,11 @@ const verifyTokenMiddleware = async (req: Request, res: Response): Promise<void>
 }
 
 // Middleware to check if the user has admin role
-const checkIfAdmin = (req: Request, res: Response, next: NextFunction) => {
-  const user = req.body
-  const language = user.language
+const checkIfAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  const { language } = req.params
+  const { userID } = req.query
+  //find user
+  const user = await User.findById(userID)
   if (user && user.role > 2) {
     // User is an admin, allow access
     next()
@@ -370,6 +360,24 @@ const checkIfAdmin = (req: Request, res: Response, next: NextFunction) => {
       message:
         EAccessDeniedAdminPrivilegeRequired[language as ELanguage] ||
         'Access denied. Admin privilege required.',
+    })
+  }
+}
+
+const checkIfManagement = async (req: Request, res: Response, next: NextFunction) => {
+  const { language } = req.params
+  const { userID } = req.query
+  //find user
+  const user = await User.findById(userID)
+  if (user && user.role > 1) {
+    // User is an manager, allow access
+    next()
+  } else {
+    // User is not an manager, deny access
+    res.status(403).json({
+      message:
+        EAccessDeniedManagementPrivilegeRequired[language as ELanguage] ||
+        'Access denied. Management privilege required.',
     })
   }
 }
@@ -978,42 +986,6 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// }
-
-// const loginUser = async (req: Request, res: Response): Promise<void> => {
-//   const comparePassword = async function (
-//     this: IUser,
-//     candidatePassword: string
-//   ): Promise<boolean> {
-//     try {
-//       const isMatch: boolean = await bcrypt.compare(candidatePassword, this.password!)
-//       return isMatch
-//     } catch (error) {
-//       console.error('Error:', error)
-//       return false
-//     }
-//   }
-//   try {
-//     const { username, password } = req.body
-//     const user: IUser | null = await User.findOne({ username })
-//     if (!user) {
-//       res.status(401).json({ message: 'User not found' })
-//     } else if (!user.verified) {
-//       res.status(401).json({ message: 'User not verified. Please check your email' })
-//     } else {
-//       const passwordMatch: boolean = await comparePassword.call(user, password)
-//       if (passwordMatch) {
-//         res.status(200).json({ message: 'User logged in' })
-//       } else {
-//         res.status(401).json({ message: 'Invalid login credentials' })
-//       }
-//     }
-//   } catch (error) {
-//     console.error('Error:', error)
-//     res.status(500).json({ message: EError[(req.body.language as ELanguage) || 'en'] })
-//   }
-// }
-
 const registerUser = async (req: Request, res: Response): Promise<void> => {
   //User.collection.dropIndex('jokes_1')
   // try {
@@ -1147,25 +1119,6 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
     }
   }
 }
-
-// const refreshExpiredToken = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const token = req.headers.authorization?.split(' ')[1] as IToken['token']
-//     if (!token) throw new Error('No token provided')
-
-//     // Verify the expired token and get the user ID
-//     const decoded = verifyToken(token)
-
-//     // Create a new token for the user
-//     const newToken = generateToken(decoded?.userId)
-
-//     // Send the new token back to the client
-//     res.status(200).json({ newToken })
-//   } catch (error) {
-//     console.error('Error:', error)
-//     res.status(500).json({ message: EError[(req.body.language as ELanguage) || 'en'] })
-//   }
-// }
 
 type TRefreshExpiredToken = {
   success: boolean
@@ -1376,80 +1329,6 @@ const refreshExpiredToken = async (
   })
 }
 
-// const refreshExpiredTokenOriginal = async (req: Request) => {
-//   try {
-//     const token = req.headers.authorization?.split(' ')[1] as IToken['token']
-//     if (!token) throw new Error('No token provided')
-
-//     // Verify the expired token and get the user ID
-//     const decoded = verifyToken(token)
-
-//     // Create a new token for the user
-//     const newToken = generateToken(decoded?.userId)
-
-//     // // Send the new token back to the client
-//     //return { success: true, message: 'Token refreshed successfully', newToken }
-
-//     const body = req.body as Pick<IUser, 'username' | 'language'>
-//     const secret = process.env.JWT_SECRET || 'jgtrshdjfshdf'
-
-//     const user = await User.findOne({ username: body.username })
-//     if (!user) {
-//       return { success: false, message: `${EErrorCreatingToken[body.language]} *` }
-//     } else {
-//       // try {
-//       jwt.sign({ userId: user?._id }, secret, { expiresIn: '1d' }, (err, token) => {
-//         if (err) {
-//           console.error(err)
-//           return {
-//             success: false,
-//             message: EErrorCreatingToken[body.language] || 'Error creating token',
-//           }
-//         } else {
-//           user.token = token
-
-//           const link = `${process.env.BASE_URI}/api/users/verify/${token}?lang=${body.language}`
-
-//           user
-//             .save()
-//             .then(() =>
-//               sendMail(body.username, body.language as unknown as ELanguage, link)
-//             )
-//             .then((r) => {
-//               console.log('Ärrä', r)
-//               return {
-//                 success: true,
-//                 message: ETokenSent[body.language] || 'Token sent',
-//                 user,
-//               }
-//             })
-//             .catch((error) => {
-//               console.error(error)
-//               return {
-//                 success: false,
-//                 message: EErrorSendingMail[body.language] || 'Error sending mail ¤',
-//               }
-//             })
-//         }
-//       })
-//       // } catch (error) {
-//       //   console.error('Error:', error)
-//       //   return {
-//       //     success: false,
-//       //     message: EError[(req.body.language as ELanguage) || 'en'] || '¤ Error',
-//       //   }
-//       // }
-//     }
-//   } catch (error) {
-//     console.error('Error:', error)
-//     return {
-//       success: false,
-//       message:
-//         EError[(req.body.language as ELanguage) || 'en'] || 'Error refreshing token',
-//     }
-//   }
-// }
-
 const requestNewToken = async (req: Request, res: Response): Promise<void> => {
   const language = req.body.language || req.query.lang || 'en'
   if (!req.body.username) {
@@ -1488,117 +1367,6 @@ const requestNewToken = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// const hashedPassword = await bcrypt.hash(password, saltRounds)
-//     const user: IUser | null = await User.findOne({ username })
-//     if (user) {
-//       res.status(401).json({ message: 'Cannot register' })
-//     } else {
-//       const newUser: IUser = new User({
-//         username,
-//         password: hashedPassword,
-//         jokes,
-//         language,
-//         verified: false,
-//       })
-
-//       enum EHelloWelcome {
-//         en = "Hello, welcome to the Comedian's Companion",
-//         es = 'Hola, bienvenido al Compañero del Comediante',
-//         fr = 'Bonjour, bienvenue au Compagnon du Comédien',
-//         de = 'Hallo, willkommen beim Begleiter des Komikers',
-//         pt = 'Olá, bem-vindo ao Companheiro do Comediante',
-//         cs = 'Ahoj, vítejte u Společníka komika',
-//       }
-//       enum EEmailMessage {
-//         en = 'Please verify your email',
-//         es = 'Por favor verifica tu correo electrónico',
-//         fr = 'Veuillez vérifier votre email',
-//         de = 'Bitte überprüfen Sie Ihre E-Mail',
-//         pt = 'Por favor, verifique seu email',
-//         cs = 'Prosím, ověřte svůj email',
-//       }
-//       enum EMessage {
-//         en = 'User registered. Please check your email for the verification link',
-//         es = 'Usuario registrado. Por favor, compruebe su correo electrónico para el enlace de verificación',
-//         fr = 'Utilisateur enregistré. Veuillez vérifier votre email pour le lien de vérification',
-//         de = 'Benutzer registriert. Bitte überprüfen Sie Ihre E-Mail für den Bestätigungslink',
-//         pt = 'Usuário registrado. Por favor, verifique seu email para o link de verificação',
-//         cs = 'Uživatel registrován. Prosím, zkontrolujte svůj email pro ověřovací odkaz',
-//       }
-
-//       const secret: Secret = process.env.JWT_SECRET || 'jgtrshdjfshdf'
-
-//       const token = jwt.sign({ userId: newUser._id }, secret, { expiresIn: '1d' })
-
-//       const link = `${process.env.BASE_URI}/api/users/verify/${token}?lang=${language}`
-
-//       newUser.token = token
-
-//       const sendMail = (): Promise<any> => {
-//         return new Promise((resolve, reject) => {
-//           transporter.sendMail(
-//             {
-//               from: `${process.env.NODEMAILER_USER}`,
-//               to: username,
-//               subject: EHelloWelcome[language as ELanguage],
-//               text: `${EEmailMessage[language as ELanguage]}: ${link}`,
-//             },
-//             (error: Error | null, info: any) => {
-//               if (error) {
-//                 console.error(error)
-//                 reject(error)
-//                 res
-//                   .status(500)
-//                   .json({ message: EError[(req.body.language as ELanguage) || 'en'] })
-//               } else {
-//                 console.log('Email sent: ' + info.response)
-//                 resolve(info.response)
-//                 res.status(201).json({
-//                   message: EMessage[language as ELanguage],
-//                 })
-//               }
-//             }
-//           )
-//         })
-//       }
-//       enum EErrorSendingMail {
-//         en = 'Error sending mail',
-//         es = 'Error al enviar el correo',
-//         fr = 'Erreur lors de l envoi du mail',
-//         de = 'Fehler beim Senden der E-Mail',
-//         pt = 'Erro ao enviar email',
-//         cs = 'Chyba při odesílání emailu',
-//       }
-//       sendMail()
-//         .then((result) => {
-//           newUser.save()
-//           console.log(result)
-//         })
-//         .catch((error) => {
-//           console.error(error)
-//           res.status(500).json({
-//             message: EErrorSendingMail[(req.body.language as ELanguage) || 'en'],
-//           })
-//         })
-
-//       // await transporter.sendMail({
-//       //   from: `${process.env.NODEMAILER_USER}`,
-//       //   to: username,
-//       //   subject: EHelloWelcome[language as ELanguage],
-//       //   text: `${EEmailMessage[language as ELanguage]}: ${link}`,
-//       // })
-
-//       // res.status(201).json({
-//       //   message: EMessage[language as ELanguage],
-//       // })
-//     }
-//   } catch (error) {
-//     console.error('Error:', error)
-//     const language = req.body.language || 'en'
-//     res.status(500).json({ error, message: EError[language as ELanguage] })
-//   }
-// }
-
 const verifyEmailToken = async (req: Request, res: Response): Promise<void> => {
   try {
     const token = req.params.token
@@ -1629,12 +1397,6 @@ const verifyEmailToken = async (req: Request, res: Response): Promise<void> => {
         cs = 'Váš účet byl úspěšně ověřen',
         fi = 'Tilisi on vahvistettu onnistuneesti',
       }
-
-      // let urlParams =
-      //   typeof window !== 'undefined'
-      //     ? new URLSearchParams(window.location.search)
-      //     : undefined
-      // let language = urlParams?.get('lang')
 
       const language = req.query.lang || 'en'
       const htmlResponse = `
@@ -1768,82 +1530,6 @@ const verifyEmailToken = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-// const verificationSuccess = async (req: Request, res: Response): Promise<void> => {
-//   const urlParams = new URLSearchParams(window.location.search)
-//   const language = urlParams.get('lang')
-
-//   enum EVerificationSuccessful {
-//     en = 'Verification Successful',
-//     es = 'Verificación exitosa',
-//     fr = 'Vérification réussie',
-//     de = 'Verifizierung erfolgreich',
-//     pt = 'Verificação bem-sucedida',
-//     cs = 'Úspěšná verifikace',
-//   }
-
-//   enum EAccountSuccessfullyVerified {
-//     en = 'Your account has been successfully verified',
-//     es = 'Su cuenta ha sido verificada con éxito',
-//     fr = 'Votre compte a été vérifié avec succès',
-//     de = 'Ihr Konto wurde erfolgreich verifiziert',
-//     pt = 'Sua conta foi verificada com sucesso',
-//     cs = 'Váš účet byl úspěšně ověřen',
-//   }
-
-//   enum EBackToTheApp {
-//     en = 'Back to the App',
-//     es = 'Volver a la aplicación',
-//     fr = 'Retour à l application',
-//     de = 'Zurück zur App',
-//     pt = 'Voltar para o aplicativo',
-//     cs = 'Zpět do aplikace',
-//   }
-
-//   const htmlResponse = `
-//     <html lang=${language ?? 'en'}>
-//       <head>
-//         <meta charset="UTF-8">
-//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//         <style>
-//         @import url('https://fonts.googleapis.com/css2?family=Caveat&family=Oswald:wght@500;600&display=swap');
-//         @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
-//           body {
-//             font-family: Lato, Helvetica, Arial, sans-serif;
-//             background-color: hsl(219, 100%, 10%);
-//             color: white;
-//             letter-spacing: -0.03em;
-//             display:flex;
-//             justify-content:center;
-//             align-items:center;
-//             min-height: 100vh;
-//           }
-//           body > div {
-//             margin: 0 auto;
-//             max-width: 800px;
-//           }
-//           h1 {
-//             font-family: Oswald, Lato, Helvetica, Arial, sans-serif;
-//           }
-//           p {
-//             font-size: 18px;
-//           }
-//         </style>
-//         <title>${EJenniinaFi[language as ELanguage || 'en']}</title>
-//       </head>
-//       <body>
-//       <div>
-//         <h1>${EVerificationSuccessful[language as ELanguage]}</h1>
-//         <p>${EAccountSuccessfullyVerified}.</p>
-//         <p>
-//         <a href=${process.env.SITE_URL}>${EBackToTheApp[language as ELanguage]}</a>
-//         </p>
-//       </div>
-//       </body>
-//     </html>
-//   `
-//   res.send(htmlResponse)
-// }
-
 const findUserByUsername = async (req: Request, res: Response): Promise<void> => {
   try {
     const userByUsername: IUser | null = await User.findOne({
@@ -1867,15 +1553,6 @@ const findUserByUsername = async (req: Request, res: Response): Promise<void> =>
       .json({ success: false, message: EError[(req.body.language as ELanguage) || 'en'] })
   }
 }
-// const findUserByUsername = async (username: string): Promise<IUser | null> => {
-//   try {
-//     const userByUsername = await User.findOne({ username })
-//     return userByUsername || null
-//   } catch (error) {
-//     console.error('Error:', error)
-//     return null
-//   }
-// }
 
 const logoutUser = async (req: Request, res: Response): Promise<void> => {
   const language = req.body.language || req.query.lang || 'en'
@@ -1956,13 +1633,6 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
       </body>
     </html>
     `)
-      // res.status(400).json({
-      //   success: false,
-      //   message:
-      //     `${EInvalidOrMissingToken[language as ELanguage]}. ${
-      //       ELogInAtTheAppOrRequestANewPasswordResetToken[language as ELanguage]
-      //     }` || 'Invalid or expired token',
-      // })
     } else if (user) {
       const htmlResponse = `
     <html lang=${language}>
@@ -2378,8 +2048,8 @@ const removeJokeFromBlacklisted = async (req: Request, res: Response): Promise<v
 }
 
 export {
-  // verificationSuccess,
   checkIfAdmin,
+  checkIfManagement,
   authenticateUser,
   getUsers,
   getUser,

@@ -1,5 +1,6 @@
 import { Router, Response, Request, NextFunction } from 'express'
-//import { body } from 'express-validator'
+const { body, check, validationResult } = require('express-validator')
+const { sendEmailForm, sendEmailSelect } = require('../controllers/email')
 import {
   getQuizzes,
   addQuiz,
@@ -35,6 +36,7 @@ import {
   verifyTokenMiddleware,
   findUserByUsername,
   checkIfAdmin,
+  checkIfManagement,
   authenticateUser,
   //verificationSuccess,
   requestNewToken,
@@ -59,12 +61,7 @@ import {
   deleteUserFromJoke,
   verifyJoke,
 } from '../controllers/jokes'
-import {
-  EPleaseProvideAValidEmailAddressOrLeaveTheFieldEmpty,
-  ELanguage,
-  EBlobsSavedSuccessfully,
-  EErrorSavingData,
-} from '../types'
+import { ELanguage, ELanguages } from '../types'
 import {
   getAllBlobsByUser,
   getBlobsVersionByUser,
@@ -73,8 +70,27 @@ import {
   editBlobsByUser,
 } from '../controllers/blobs'
 import { takeScreenshot } from '../controllers/screenshot'
+import {
+  newOrder,
+  getOrderByOrderID,
+  orderConfirmation,
+  getAllOrders,
+  deleteOrder,
+  updateOrder,
+  orderChangeConfirmation,
+} from '../controllers/cart'
+import { EPleaseProvideAValidEmailAddress } from '../controllers/email'
 
 const router = Router()
+
+const validateNewOrderEmail = [
+  check('info.email')
+    .isEmail()
+    .withMessage(
+      (value: string, { req }: { req: Request }) =>
+        EPleaseProvideAValidEmailAddress[(req.params.language as ELanguages) ?? 'en']
+    ),
+]
 
 router.post('/api/login', loginUser)
 
@@ -140,12 +156,19 @@ router.delete('/api/todo/:user', clearCompletedTodos)
 router.post('/api/todo/:user/order', editTodoOrder)
 //router.put('/api/todo', addOrderToAllTodos)
 
+router.post('/api/cart/:language', validateNewOrderEmail, newOrder, orderConfirmation)
+router.get('/api/cart/:language/:orderID', getOrderByOrderID)
+router.get('/api/cart/:language', [checkIfManagement, getAllOrders])
+router.delete('/api/cart/:language/:orderID', [checkIfAdmin, deleteOrder])
+router.put('/api/cart/:language/:orderID', [
+  checkIfAdmin,
+  updateOrder,
+  orderChangeConfirmation,
+])
+
 router.get('/', (req, res) => {
   res.send('Nothing to see here')
 })
-
-const { body, validationResult } = require('express-validator')
-const { sendEmailForm, sendEmailSelect } = require('../controllers/email')
 
 router.post(
   '/api/send-email-form',

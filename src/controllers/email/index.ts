@@ -20,6 +20,15 @@ export type SelectData = {
   favoriteHero: string
   clarification: string
 }
+export enum EEmail {
+  en = 'Email',
+  es = 'Correo electrónico',
+  fr = 'Email',
+  de = 'E-Mail',
+  pt = 'Email',
+  cs = 'E-mail',
+  fi = 'Sähköposti',
+}
 export enum EEmailSent {
   en = 'Email sent',
   es = 'Correo electrónico enviado',
@@ -38,6 +47,15 @@ export enum EErrorSendingMail {
   cs = 'Chyba při odesílání e-mailu',
   fi = 'Virhe sähköpostin lähetyksessä',
 }
+export enum EPleaseProvideAValidEmailAddress {
+  en = 'Please provide a valid email address',
+  es = 'Proporcione una dirección de correo electrónico válida',
+  fr = 'Veuillez fournir une adresse e-mail valide',
+  de = 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+  pt = 'Por favor, forneça um endereço de e-mail válido',
+  cs = 'Zadejte platnou e-mailovou adresu',
+  fi = 'Anna kelvollinen sähköpostiosoite',
+}
 
 const { validationResult } = require('express-validator')
 const sanitizeHtml = require('sanitize-html')
@@ -54,7 +72,7 @@ const transporter = nodemailer.createTransport({
 export const sendMail = (
   subject: string,
   message: string,
-  username: IUser['username'],
+  username: IUser['username'] | undefined,
   link: string
 ) => {
   return new Promise((resolve, reject) => {
@@ -63,7 +81,7 @@ export const sendMail = (
         from: process.env.NODEMAILER_USER,
         to: username,
         subject: subject,
-        text: message ? `${message}: ${link}` : link,
+        text: `${message}\n\n ${link}`,
       },
       (error: Error, info: { response: unknown }) => {
         if (error) {

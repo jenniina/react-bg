@@ -1,18 +1,15 @@
-import e from 'express'
 import { model, Schema } from 'mongoose'
-import { idText } from 'typescript'
 
 export interface ICartItem {
   id: string
   name: string
   description: string
   price: number
-  downpayment: number
   quantity: number
   details?: string
 }
 
-export type paid = 'downpayment' | 'full' | 'partial' | 'none'
+export type paid = 'full' | 'partial' | 'none'
 export type status = 'pending' | 'in progress' | 'completed' | 'cancelled'
 
 export interface ICart {
@@ -66,13 +63,12 @@ const CartItemSchema: Schema = new Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
-  downpayment: { type: Number, required: true },
   quantity: { type: Number, required: true },
   details: { type: String, required: false },
   paid: {
     type: String,
     required: true,
-    enum: ['downpayment', 'full', 'partial', 'none'],
+    enum: ['full', 'partial', 'none'],
     default: 'none',
   },
   status: {
@@ -102,7 +98,7 @@ const CartSchema: Schema = new Schema({
   paid: {
     type: String,
     required: true,
-    enum: ['downpayment', 'full', 'partial', 'none'],
+    enum: ['full', 'partial', 'none'],
     default: 'none',
   },
   status: {

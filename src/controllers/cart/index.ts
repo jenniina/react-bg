@@ -55,15 +55,6 @@ export enum ETotal {
   cs = 'Celkem',
   fi = 'Yhteensä',
 }
-export enum EDownpayment {
-  en = 'Downpayment',
-  es = 'Pago inicial',
-  fr = 'Acompte',
-  de = 'Anzahlung',
-  pt = 'Entrada',
-  cs = 'Záloha',
-  fi = 'Ennakko',
-}
 export enum ENewOrderFrom {
   en = 'New order from ',
   es = 'Nuevo pedido de ',
@@ -316,10 +307,6 @@ export const orderConfirmation = async (req: Request, res: Response) => {
       (acc: number, item: ICartItem) => acc + item.price * item.quantity,
       0
     )} €. \n
-    ${EDownpayment[(language as ELanguages) ?? 'en']}: ${items.reduce(
-      (acc: number, item: ICartItem) => acc + item.downpayment * item.quantity,
-      0
-    )} €. \n     
     ${extra && extra.trim() !== '' ? `Info: ${extra} \n ` : ''}
     
     ${Object.keys(information)
@@ -367,11 +354,7 @@ export const orderConfirmation = async (req: Request, res: Response) => {
       ${ETotal[(language as ELanguages) ?? 'en']}: ${items.reduce(
       (acc: number, item: ICartItem) => acc + item.price * item.quantity,
       0
-    )} €. \n 
-    ${EDownpayment[(language as ELanguages) ?? 'en']}: ${items.reduce(
-      (acc: number, item: ICartItem) => acc + item.downpayment * item.quantity,
-      0
-    )} €. \n 
+    )} €. \n
     ${extra && extra.trim() !== '' ? `Info: ${extra} \n ` : ''}
 
     ${Object.keys(information)
@@ -529,10 +512,6 @@ export const orderChangeConfirmation = async (req: Request, res: Response) => {
       (acc: number, item: ICartItem) => acc + item.price * item.quantity,
       0
     )} €. \n
-    ${EDownpayment[(language as ELanguages) ?? 'en']}: ${items.reduce(
-      (acc: number, item: ICartItem) => acc + item.downpayment * item.quantity,
-      0
-    )} €. \n 
     ${extra && extra.trim() !== '' ? `Info: ${extra} \n ` : ''}
 
     ${Object.keys(information)

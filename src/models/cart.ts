@@ -88,7 +88,7 @@ const CartSchema: Schema = new Schema({
         return orderIDPattern.test(v)
       },
       message: (props: any) =>
-        `${props.value} is not a valid orderID! It should follow the format 12345-ABCDE.`,
+        `${props.value} is not a valid orderID! It should follow the format 123456-AB.`,
     },
   },
   info: { type: InfoSchema, required: true },

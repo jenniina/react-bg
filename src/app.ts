@@ -1,6 +1,7 @@
 import express, { Express } from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
+import bodyParser from 'body-parser'
 import routes from './routes'
 
 require('dotenv').config()
@@ -21,11 +22,13 @@ app.use(
       'Content-Type',
       'Accept',
       'Authorization',
+      'x-api-key',
     ],
     exposedHeaders: ['Content-Type'],
   })
 )
 app.use(express.json())
+app.use(bodyParser.json())
 // Middleware to parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('dist'))

@@ -90,7 +90,6 @@ import {
   cleanUpHighScores,
   changePlayerName,
 } from '../controllers/memory'
-import checkKey from '../middleware/checkKey'
 
 const router = Router()
 
@@ -159,31 +158,15 @@ router.get('/api/quiz/:id', getUserQuiz)
 router.delete('/api/quiz/remove/:user', removeOldestDuplicate)
 
 router.get('/api/highscores/:language', getAllHighScores)
-router.post(
-  '/api/highscores/:language/key/:levelKey',
-  checkKey,
-  checkIfManagement,
-  addHighScore
-)
+router.post('/api/highscores/:language/key/:levelKey', checkIfManagement, addHighScore)
 router.get('/api/highscores/:language/key/:levelKey', getHighScoresByLevel)
-router.put(
-  '/api/highscores/:language/id/:id',
-  checkKey,
-  checkIfManagement,
-  updateHighScore
-)
-router.delete('/api/highscores/:language/id/:id', checkKey, deleteHighScore)
+router.put('/api/highscores/:language/id/:id', checkIfManagement, updateHighScore)
+router.delete('/api/highscores/:language/id/:id', deleteHighScore)
 router.delete(
   '/api/highscores/:language/player/:playerName',
-  checkKey,
   deleteHighScoresByPlayerName
 )
-router.put(
-  '/api/highscores/:language/player',
-  checkKey,
-  checkIfManagement,
-  changePlayerName
-)
+router.put('/api/highscores/:language/player', checkIfManagement, changePlayerName)
 router.post('/api/highscores/:language/cleanup/:levelKey', cleanUpHighScores)
 
 router.get('/api/todo/:user', getTodos)

@@ -53,9 +53,9 @@ const takeScreenshot = async (req: Request, res: Response) => {
       await browser.close()
       return res.status(404).send('Screenshot target not found')
     }
-
     const screenshotBuffer = await element.screenshot()
     const screenshot = Buffer.from(screenshotBuffer).toString('base64')
+
     await browser.close()
 
     res.setHeader('Content-Type', 'application/json')

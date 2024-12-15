@@ -93,6 +93,22 @@ export interface IToken {
   createdAt: Date
 }
 
+export interface ImageHit {
+  id: number
+  previewURL: string
+  webformatURL: string
+  largeImageURL: string
+  pageURL: string
+  tags: string
+  user: string
+}
+
+export interface ImagesResponse {
+  success: boolean
+  message: string
+  hits: ImageHit[]
+}
+
 export enum EQuizType {
   easy = 'easy',
   medium = 'medium',

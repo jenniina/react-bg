@@ -3,5 +3,5 @@ nodemon.json
 .env 
 dist 
 .cache
-.gitattributes
-
+.gitattributes 
+D.local

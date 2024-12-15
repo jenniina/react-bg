@@ -90,6 +90,8 @@ import {
   cleanUpHighScores,
   changePlayerName,
 } from '../controllers/memory'
+import { searchImages } from '../controllers/images'
+import { getQuotes } from '../controllers/quotes'
 
 const router = Router()
 
@@ -168,6 +170,10 @@ router.delete(
 )
 router.put('/api/highscores/:language/player', checkIfManagement, changePlayerName)
 router.post('/api/highscores/:language/cleanup/:levelKey', cleanUpHighScores)
+
+router.get('/api/images/:language', searchImages)
+
+router.get('/api/quotes/:language/:category', getQuotes)
 
 router.get('/api/todo/:user', getTodos)
 router.put('/api/todo/:user', updateAllTodos)

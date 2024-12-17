@@ -4,4 +4,4 @@ Dockerfile
 dist
 .env
 .cache
-D.local
+*.local

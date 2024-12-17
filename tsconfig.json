@@ -10,7 +10,6 @@
     },
     "include": [
         "src/**/*",
-        "poems.local",
     ],
     "exclude": [
         "node_modules",

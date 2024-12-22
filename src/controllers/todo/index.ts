@@ -77,22 +77,30 @@ const addTodo = async (req: Request, res: Response) => {
     }
     const { complete, name, key, priority, category, deadline } = req.body
 
-    const maxOrder = todoDocument.todos.reduce(
-      (max: number, todo: ITodo) => (todo.order > max ? todo.order : max),
-      0
-    )
-
     if (complete === undefined || name === undefined || key === undefined) {
       return res.status(400).json({
         success: false,
         message: 'Task must include complete, name, and key fields',
       })
     }
+
+    let newOrder: number
+
+    if (priority === 'high') {
+      newOrder = 0
+    } else {
+      const maxOrder =
+        todoDocument.todos.length > 0
+          ? Math.max(...todoDocument.todos.map((todo: ITodo) => todo.order))
+          : 0
+      newOrder = maxOrder + 1
+    }
+
     const newTodo = {
       complete,
       name,
       key,
-      order: maxOrder + 1,
+      order: newOrder,
       priority,
       category,
       deadline,
@@ -108,6 +116,17 @@ const addTodo = async (req: Request, res: Response) => {
         .json({ success: false, message: 'No todos found for this user' })
     }
     const addedTodo = updatedTodoDocument.todos.find((todo: ITodo) => todo.key === key)
+
+    const sortedTodos: ITodo[] = todoDocument.todos.sort(
+      (a: ITodo, b: ITodo) => a.order - b.order
+    )
+
+    sortedTodos.forEach((todo: ITodo, index: number) => {
+      todo.order = index + 1
+    })
+
+    await todoDocument.save()
+
     res.json(addedTodo)
   } catch (error) {
     console.error(error)

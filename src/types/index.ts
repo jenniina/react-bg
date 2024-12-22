@@ -141,11 +141,20 @@ export interface IQuizQuestion extends Document {
   updatedAt?: string
 }
 
+export type TPriority = 'all' | 'low' | 'medium' | 'high'
+
+export type TCategory = 'all' | 'work' | 'personal' | 'shopping' | 'other'
+
+export type TSortOptions = 'none' | 'text' | 'priority' | 'deadline' | 'category'
+
 export interface ITodo extends Document {
   key: string
   name: string
   order: number
   complete: boolean
+  priority?: TPriority
+  deadline?: string
+  category?: TCategory
   createdAt?: string
   updatedAt?: string
 }

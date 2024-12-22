@@ -3,6 +3,32 @@ import { Response, Request } from 'express'
 import { ITodo, ITodos } from '../../types'
 import mongoose from 'mongoose'
 
+// const addNewFieldsToTodos = async () => {
+//   try {
+//     const todos = await Todo.find({})
+
+//     for (let todoDocument of todos) {
+//       let updatedTodos = todoDocument.todos.map((todo: ITodo): ITodo => {
+//         if (!todo.priority) todo.priority = 'low'
+//         if (!todo.category) todo.category = 'other'
+//         if (!todo.deadline) todo.deadline = ''
+//         return todo
+//       })
+
+//       await Todo.findOneAndUpdate(
+//         { _id: todoDocument._id },
+//         { $set: { todos: updatedTodos } },
+//         { new: true, useFindAndModify: false }
+//       )
+//       console.log('Updated todoDocument: ', todoDocument)
+//     }
+
+//     console.log('New fields added to all todos')
+//   } catch (error) {
+//     console.error('Error adding new fields to todos:', error)
+//   }
+// }
+
 const getTodos = async (req: Request, res: Response) => {
   try {
     const { user } = req.params
@@ -29,19 +55,10 @@ const updateAllTodos = async (req: Request, res: Response) => {
       const savedTodoDocument = await newTodo.save()
       return res.json(savedTodoDocument.todos)
     } else {
-      // console.log('todoDocument.todos 1: ', todoDocument.todos)
-      todoDocument.todos = todoDocument.todos.map((todo: ITodo) => {
-        const newTodo = newTodos.find((newTodo) => newTodo.key === todo.key)
-        return newTodo ? newTodo : todo
-      })
-      // console.log('todoDocument.todos 2: ', todoDocument.todos)
-      todoDocument = await Todo.findOneAndUpdate(
-        { user },
-        { todos: todoDocument.todos },
-        { new: true, useFindAndModify: false }
-      )
-      // console.log('todoDocument: ', todoDocument)
-      return res.json(todoDocument?.todos)
+      // Replace existing todos with newTodos
+      todoDocument.todos = newTodos
+      const updatedTodoDocument = await todoDocument.save()
+      return res.json(updatedTodoDocument.todos)
     }
   } catch (error) {
     console.error(error)
@@ -58,21 +75,28 @@ const addTodo = async (req: Request, res: Response) => {
         .status(404)
         .json({ success: false, message: 'No todos found for this user' })
     }
-    const { complete, name, key } = req.body
+    const { complete, name, key, priority, category, deadline } = req.body
+
     const maxOrder = todoDocument.todos.reduce(
       (max: number, todo: ITodo) => (todo.order > max ? todo.order : max),
       0
     )
 
     if (complete === undefined || name === undefined || key === undefined) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Task must include complete, name, and key fields',
-        })
+      return res.status(400).json({
+        success: false,
+        message: 'Task must include complete, name, and key fields',
+      })
     }
-    const newTodo = { complete, name, key, order: maxOrder + 1 }
+    const newTodo = {
+      complete,
+      name,
+      key,
+      order: maxOrder + 1,
+      priority,
+      category,
+      deadline,
+    }
     const updatedTodoDocument = await Todo.findOneAndUpdate(
       { user },
       { $push: { todos: newTodo } },
@@ -151,7 +175,15 @@ const editTodo = async (req: Request, res: Response) => {
     const { user, key } = req.params
     const todoDocument = await Todo.findOneAndUpdate(
       { user, 'todos.key': key },
-      { $set: { 'todos.$.complete': req.body.complete, 'todos.$.name': req.body.name } },
+      {
+        $set: {
+          'todos.$.complete': req.body.complete,
+          'todos.$.name': req.body.name,
+          'todos.$.priority': req.body.priority,
+          'todos.$.category': req.body.category,
+          'todos.$.deadline': req.body.deadline,
+        },
+      },
       { new: true }
     )
     if (!todoDocument) {
@@ -174,12 +206,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
     const todosWithNewOrder = req.body.todos // This should be an array of objects with keys: { key, order }
 
     if (!todosWithNewOrder || !Array.isArray(todosWithNewOrder)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Todos field is required and it should be an array',
-        })
+      return res.status(400).json({
+        success: false,
+        message: 'Todos field is required and it should be an array',
+      })
     }
 
     const session = await mongoose.startSession()
@@ -195,12 +225,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
       if (!updatedTodoDocument) {
         await session.abortTransaction()
         session.endSession()
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `No todo found for this user with key: ${key}`,
-          })
+        return res.status(404).json({
+          success: false,
+          message: `No todo found for this user with key: ${key}`,
+        })
       }
     }
 
@@ -211,12 +239,10 @@ const editTodoOrder = async (req: Request, res: Response) => {
     res.json(updatedTodos)
   } catch (error) {
     console.error(error)
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: `Internal server error. ${(error as Error).message}`,
-      })
+    res.status(500).json({
+      success: false,
+      message: `Internal server error. ${(error as Error).message}`,
+    })
   }
 }
 
@@ -247,4 +273,5 @@ export {
   clearCompletedTodos,
   editTodoOrder,
   // addOrderToAllTodos,
+  // addNewFieldsToTodos,
 }

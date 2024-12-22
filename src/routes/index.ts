@@ -16,6 +16,7 @@ import {
   clearCompletedTodos,
   editTodoOrder,
   // addOrderToAllTodos,
+  // addNewFieldsToTodos,
 } from '../controllers/todo'
 
 import {
@@ -182,7 +183,8 @@ router.delete('/api/todo/:user/:key', deleteTodo)
 router.put('/api/todo/:user/:key', editTodo)
 router.delete('/api/todo/:user', clearCompletedTodos)
 router.post('/api/todo/:user/order', editTodoOrder)
-//router.put('/api/todo', addOrderToAllTodos)
+// router.put('/api/todo', addOrderToAllTodos)
+// router.put('/api/todo/', addNewFieldsToTodos)
 
 router.post('/api/cart/:language', validateNewOrderEmail, newOrder, orderConfirmation)
 router.get('/api/cart/:language/:orderID', getOrderByOrderID)

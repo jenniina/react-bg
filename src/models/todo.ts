@@ -1,4 +1,5 @@
 import { model, Schema } from 'mongoose'
+import { IUser } from '../types'
 
 const taskSchema: Schema = new Schema(
   {
@@ -17,6 +18,20 @@ const taskSchema: Schema = new Schema(
     complete: {
       type: Boolean,
       required: true,
+    },
+    priority: {
+      type: String,
+      enum: ['all', 'low', 'medium', 'high'],
+      default: 'low',
+    },
+    deadline: {
+      type: String,
+      default: null,
+    },
+    category: {
+      type: String,
+      enum: ['all', 'work', 'personal', 'shopping', 'other'],
+      default: 'other',
     },
   },
   { timestamps: true }
